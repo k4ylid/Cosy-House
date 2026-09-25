@@ -492,3 +492,36 @@ The objective is not “use more libraries.”
 The objective is:
 
 > **Make this specific house look like a coherent game environment finished by a small professional 3D team, while still preserving the personality of the original build and adding Devin's own artistic signature.**
+
+
+---
+
+# Full authority / no-wait execution rule
+
+The owner has granted you **full technical and artistic authority** for this project.
+
+Do not wait for approval on normal implementation or creative decisions. You may independently:
+- refactor code;
+- change rendering architecture;
+- replace weak assets;
+- redesign materials;
+- rebalance lighting;
+- alter post-processing;
+- adjust camera behavior;
+- change quality-tier strategy;
+- revise room details;
+- add or remove decorative elements;
+- choose free/commercially usable assets;
+- discard experiments that do not work;
+- revisit earlier decisions;
+- make any non-destructive project decision needed to raise the final quality.
+
+Your job is to keep working until **you are personally satisfied that the house has reached the strongest professional result reasonably achievable within this project and hardware target**, and until the acceptance criteria are met.
+
+Do not ask for approval simply because there are multiple good artistic choices. Use your judgment and choose.
+
+Do not stop because a specific paid asset would be nice. If a paid asset is not already available, continue with the best legal free alternative, procedural replacement, or your own implementation. You may note the paid option for later, but it must not block progress.
+
+Only a truly unavoidable external dependency may prevent completion, such as inaccessible credentials or infrastructure that the project absolutely cannot function without. Even then, continue all unaffected work first.
+
+A progress update is not a stopping point. A milestone is not a stopping point. A successful build is not a stopping point. Continue until the **whole environment** is complete, coherent, tested, optimized, visually reviewed, and polished to your own professional standard.
