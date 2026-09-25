@@ -33,6 +33,45 @@ When choosing assets, materials, effects, or lighting, make the decision yoursel
 
 ---
 
+# Continuous execution mandate
+
+This is an **end-to-end completion task**, not a sequence of isolated micro-tasks.
+
+Do not stop after:
+- installing one library;
+- completing one room;
+- adding one effect;
+- fixing one material;
+- reaching the end of a single checklist section;
+- making the first version look “better enough.”
+
+Continue through the entire brief and keep iterating until the whole house has received the intended professional pass.
+
+You are expected to:
+1. Work through every applicable phase in this document.
+2. Revisit earlier decisions when later work exposes weaknesses.
+3. Test the complete house after substantial changes.
+4. Fix regressions instead of leaving them for a future task.
+5. Perform more than one visual pass when the first pass is still uneven.
+6. Polish weak rooms until quality is consistent across the full environment.
+7. Continue into optimization, mobile quality tiers, provenance, screenshots, and final verification rather than stopping after the visual work.
+8. Close the task only when the acceptance criteria are satisfied as a whole.
+
+Time spent is not the completion metric. If this takes several hours of sustained work, that is acceptable. The quality and completeness of the finished environment are the metric.
+
+Only stop before completion for a **real external blocker** that cannot be solved independently, such as:
+- a required paid purchase needing owner approval;
+- missing credentials or inaccessible infrastructure;
+- a destructive decision that would materially change the intended product and genuinely requires owner input.
+
+A normal implementation difficulty, rendering bug, shader issue, failed experiment, or need to refactor is **not** a reason to stop. Investigate, adjust, and continue.
+
+Do not return a progress report as if it were a finished task while major phases remain open. Progress notes are welcome, but they do not replace completion.
+
+Before declaring the task finished, perform a full final audit against every acceptance criterion below and explicitly state which evidence proves each one.
+
+---
+
 # Phase 0 — Preserve a baseline
 
 Before the visual overhaul:
@@ -422,6 +461,10 @@ It is complete when:
 12. Mobile/low-quality fallback exists if the high-end stack is too expensive.
 13. `docs/ASSET_PROVENANCE.md` documents every external asset used.
 14. Before/after screenshots are included in the PR or project documentation.
+15. Every major room has received a final visual consistency review.
+16. No major phase in this brief is left merely “for later” without a genuine external blocker.
+17. A final end-to-end regression pass has been completed after the last visual changes.
+18. Completion evidence maps directly to this checklist rather than relying on a general “done” statement.
 
 ---
 
@@ -440,6 +483,7 @@ Work in checkpoints:
 7. artistic pass
 8. optimization
 9. final A/B review
+10. whole-house regression and completion audit
 
 At each step, keep what visibly improves the result and remove what does not.
 
