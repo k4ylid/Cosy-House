@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Reflector } from './vendor/Reflector.js';
+import { Reflector } from '../vendor/Reflector.js';
 
 /* ---------- tiny builders ---------- */
 export const M = (c, r = 0.85, met = 0, extra = {}) =>

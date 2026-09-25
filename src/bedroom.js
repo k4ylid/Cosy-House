@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Reflector } from './vendor/Reflector.js';
+import { Reflector } from '../vendor/Reflector.js';
 import {
   M, put, box, cyl, sph, cap, torus,
   setOrigin, addCol, cityTex,

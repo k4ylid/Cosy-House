@@ -362,7 +362,7 @@ function animate() {
 
   renderer.render(scene, camera);
 }
-window.__dbg = { char, camera, inWalkable, walkable, colliders,
+window.__dbg = { char, camera, renderer, inWalkable, walkable, colliders,
   setYaw: (v) => { yaw = v; }, setPitch: (v) => { pitch = v; },
   getYaw: () => yaw };
 renderer.setAnimationLoop(animate);
