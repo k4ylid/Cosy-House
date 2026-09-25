@@ -20,7 +20,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.15;
 app.appendChild(renderer.domElement);
@@ -261,14 +261,15 @@ function roomLabel(x, z) {
   return curRoom;
 }
 
-const clock = new THREE.Clock();
+const timer = new THREE.Timer();
 const headPos = new THREE.Vector3();
 const camPos = new THREE.Vector3();
 const desired = new THREE.Vector3();
 
 function animate() {
-  const dt = Math.min(clock.getDelta(), 0.05);
-  const t = clock.elapsedTime;
+  timer.update();
+  const dt = Math.min(timer.getDelta(), 0.05);
+  const t = timer.getElapsed();
 
   /* --- movement --- */
   let ix = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + joyX;
