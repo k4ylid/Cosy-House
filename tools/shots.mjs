@@ -57,6 +57,12 @@ ws.onopen = async () => {
       if (i === 39) throw new Error('page never defined __dbg');
     }
 
+    // ad-hoc pose: preset "x,z,yaw,pitch" captures a single custom shot
+    if (preset.includes(',')) {
+      const [x, z, yaw, pitch] = preset.split(',').map(Number);
+      POSES.length = 0; POSES.push(['custom', x, z, yaw, pitch]);
+    }
+
     const evalJs = async (expr) => {
       const r = await send('Runtime.evaluate', {
         expression: expr, awaitPromise: true, returnByValue: true }, sessionId);
@@ -69,7 +75,7 @@ ws.onopen = async () => {
 
     mkdirSync(outdir, { recursive: true });
     for (const [name, x, z, yaw, pitch] of POSES) {
-      if (preset !== 'all' && preset !== name) continue;
+      if (preset !== 'all' && preset !== name && name !== 'custom') continue;
       await evalJs(`__dbg.char.position.set(${x},0,${z}); __dbg.setYaw(${yaw}); __dbg.setPitch(${pitch}); "posed"`);
       await sleep(2600); // a few frames at software-GL rates
       const shot = await send('Page.captureScreenshot', { format: 'png' }, sessionId);

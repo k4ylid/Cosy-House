@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import {
   M, put, box, cyl, sph, torus,
   setOrigin, addCol, addWalk,
-  WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, GREEN, BRASS, DARK,
-  floorTex,
+  WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, GREEN, BRASS, DARK, GLOW,
+  woodFloorMat, marbleMat,
   leafyPlant, trailingPothos, bookRow, jar, bottle, candle, towelRoll,
   photoFrame, runWall, makeWindow, imgTex
 } from './common.js';
@@ -16,7 +16,7 @@ export function buildKitchen() {
   setOrigin(0, 0);
   addWalk(1.56, -3.94, 7.44, 0.94);
 
-  const floor = box(6.3, 0.1, 5.3, new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.8 }));
+  const floor = box(6.3, 0.1, 5.3, woodFloorMat(3.15, 2.65));
   put(floor, 4.5, -0.05, -1.5); g.add(floor);
 
   runWall(g, [1.5, -4], [7.5, -4]);                          /* north */
@@ -35,7 +35,7 @@ export function buildKitchen() {
   /* ---------- north counter run (x 2.4..6.9, z -3.7..-3.15) ---------- */
   addCol(2.4, -4, 6.9, -3.15);
   g.add(put(box(4.5, 0.8, 0.58, cabMat), 4.65, 0.4, -3.5));
-  g.add(put(box(4.56, 0.05, 0.62, WOOD_L), 4.65, 0.84, -3.5));
+  g.add(put(box(4.56, 0.05, 0.62, marbleMat(1.8, 0.62)), 4.65, 0.84, -3.5));
   for (let i = 0; i < 5; i++) {
     const cx = 2.85 + i * 0.9;
     g.add(put(box(0.82, 0.6, 0.02, M(0xe6ddc9, 0.9)), cx, 0.42, -3.19));
@@ -77,7 +77,7 @@ export function buildKitchen() {
   /* ---------- east counter run (x 6.9..7.35, z -3.6..0.5) + sink ---------- */
   addCol(6.85, -3.7, 7.5, 0.55);
   g.add(put(box(0.58, 0.8, 4.1, cabMat), 7.12, 0.4, -1.55));
-  g.add(put(box(0.62, 0.05, 4.16, WOOD_L), 7.1, 0.84, -1.55));
+  g.add(put(box(0.62, 0.05, 4.16, marbleMat(0.62, 2.0)), 7.1, 0.84, -1.55));
   for (let i = 0; i < 4; i++) {
     g.add(put(box(0.02, 0.6, 0.9, M(0xe6ddc9, 0.9)), 6.82, 0.42, -3.2 + i * 1.05));
     g.add(put(sph(0.015, knobMat), 6.8, 0.62, -3.2 + i * 1.05));
@@ -136,7 +136,7 @@ export function buildKitchen() {
     new THREE.MeshStandardMaterial({ color: 0x3a3a40, roughness: 0.6, side: THREE.DoubleSide })),
     4.3, 2.32, -0.8));
   g.add(put(new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 10),
-    new THREE.MeshBasicMaterial({ color: 0xffd9a0 })), 4.3, 2.26, -0.8));
+    GLOW(0xffd9a0, 2.8)), 4.3, 2.26, -0.8));
   const pendant = new THREE.PointLight(0xffca8a, 7, 5, 2);
   pendant.castShadow = true; pendant.shadow.mapSize.set(1024, 1024);
   put(pendant, 4.3, 2.2, -0.8); g.add(pendant);
@@ -158,6 +158,10 @@ export function buildKitchen() {
   /* ambient */
   const warm = new THREE.PointLight(0xffe2bc, 5, 9, 2);
   put(warm, 4.5, 2.6, -1.5); g.add(warm);
+
+  /* lived-in: mug + open magazine on the dining table */
+  g.add(put(cyl(0.032, 0.028, 0.075, M(0x8ab5c9, 0.7)), 4.55, 0.8, -0.55));
+  g.add(put(box(0.2, 0.005, 0.28, M(0xe9e2d2, 1)), 4.05, 0.768, -0.98, 0, 0.35, 0));
 
   return g;
 }

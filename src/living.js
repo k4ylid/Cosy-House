@@ -2,10 +2,10 @@ import * as THREE from 'three';
 import {
   M, put, box, cyl, sph,
   setOrigin, addCol, addWalk,
-  WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, GREEN, GREEN_L, BRASS, DARK, TERRA,
-  floorTex, geoRugTex, posterTex,
+  WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, GREEN, GREEN_L, BRASS, DARK, TERRA, GLOW,
+  geoRugTex, posterTex, woodFloorMat,
   leafyPlant, trailingPothos, monstera, bookRow, bookStack, candle, jar, bottle,
-  photoFrame, runWall, doorFrame, makeWindow, imgTex
+  photoFrame, runWall, doorFrame, makeWindow, imgTex, placeModel
 } from './common.js';
 
 /* Living room: world x[-3,3] z[4,9].
@@ -16,7 +16,7 @@ export function buildLiving() {
   setOrigin(0, 0);
   addWalk(-2.98, 4.06, 2.98, 8.94);
 
-  const floor = box(6.3, 0.1, 5.3, new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.8 }));
+  const floor = box(6.3, 0.1, 5.3, woodFloorMat(3.15, 2.65));
   put(floor, 0, -0.05, 6.5); g.add(floor);
 
   runWall(g, [-3, 4], [3, 4], { cuts: [{ s: 3, w: 0.9, sillH: 0, topH: 2.05 }] });
@@ -125,7 +125,7 @@ export function buildLiving() {
   /* pendant over table */
   g.add(put(cyl(0.008, 0.008, 0.7, DARK), 0.95, 2.8, 8.15));
   g.add(put(new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12),
-    new THREE.MeshStandardMaterial({ color: 0xfff2dd, emissive: 0xffd9a0, emissiveIntensity: 1.3, roughness: 0.9 })),
+    GLOW(0xffd9a0, 2.8)),
     0.95, 2.42, 8.15));
   const dLight = new THREE.PointLight(0xffca8a, 5, 4.5, 2);
   put(dLight, 0.95, 2.3, 8.15); g.add(dLight);
@@ -135,7 +135,7 @@ export function buildLiving() {
   g.add(put(cyl(0.11, 0.13, 0.03, BRASS), -2.5, 0.02, 7.8));
   g.add(put(cyl(0.015, 0.015, 1.45, BRASS), -2.5, 0.75, 7.8));
   g.add(put(new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.18, 0.24, 20, 1, true),
-    new THREE.MeshStandardMaterial({ color: 0xf2e2c4, emissive: 0xffca8a, emissiveIntensity: 0.9, roughness: 0.9, side: THREE.DoubleSide })),
+    new THREE.MeshStandardMaterial({ color: 0xf2e2c4, emissive: 0xffca8a, emissiveIntensity: 2.4, roughness: 0.9, side: THREE.DoubleSide })),
     -2.5, 1.52, 7.8));
   const flLight = new THREE.PointLight(0xffc27a, 7, 5, 2);
   flLight.castShadow = true; flLight.shadow.mapSize.set(1024, 1024);
@@ -143,8 +143,12 @@ export function buildLiving() {
 
   const bigLeaf = monstera(); put(bigLeaf, -2.4, 0, 8.55); g.add(bigLeaf);
   addCol(-2.7, 8.3, -2.1, 8.8);
-  const lp = leafyPlant(1.1); put(lp, 2.5, 0, 4.6); g.add(lp);
+  placeModel(g, 'potted_plant_04/potted_plant_04_1k.gltf', 2.5, 0, 4.6, 0.6, 1.15);
   addCol(2.2, 4.3, 2.8, 4.9);
+
+  /* hero piece: mid-century lounge chair in SE corner facing the sofa */
+  addCol(1.95, 8.1, 2.85, 8.85);
+  placeModel(g, 'mid_century_lounge_chair/mid_century_lounge_chair_1k.gltf', 2.4, 0, 8.45, -2.4, 0.82);
 
   /* framed art on east wall + side table */
   const art = photoFrame(0.4, 0.5, imgTex('assets/living-art.png'), 0xf4efe4);
@@ -153,6 +157,13 @@ export function buildLiving() {
   g.add(put(cyl(0.24, 0.26, 0.05, WOOD_L), 2.05, 0.5, 5.3));
   g.add(put(cyl(0.03, 0.04, 0.46, WOOD_D), 2.05, 0.25, 5.3));
   g.add(put(jar(0.09, 0.14, 0xd8cfc0), 2.05, 0.53, 5.3));
+
+  /* ceramic vase on the coffee table */
+  placeModel(g, 'ceramic_vase_01/ceramic_vase_01_1k.gltf', -1.05, 0.405, 6.55, 0.9, 0.26);
+
+  /* lived-in: remote on the sofa arm + throw blanket over the back */
+  g.add(put(box(0.05, 0.022, 0.14, DARK), -2.58, 0.9, 5.18, 0, 0.2, 0));
+  g.add(put(box(0.3, 0.05, 0.52, M(0xa9613c, 1)), -2.84, 1.12, 6.9, 0, 0, 0.14));
 
   /* ambient */
   const warm = new THREE.PointLight(0xffd9a8, 6, 10, 2);

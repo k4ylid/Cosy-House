@@ -8,6 +8,8 @@ import { buildHallway } from './hallway.js';
 import { buildBathroom } from './bathroom.js';
 import { buildKitchen } from './kitchen.js';
 import { buildLiving } from './living.js';
+import { createPipeline } from './post.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 /* ============================================================
    COZY HOUSE — walkable 3D home stitched from the images.
@@ -16,11 +18,17 @@ import { buildLiving } from './living.js';
 
 const app = document.getElementById('app');
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const params = new URLSearchParams(location.search);
+const isTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window || params.has('touch');
+const QUALITY_RAW = params.get('q') || (isTouch ? 'low' : 'high');
+const QUALITY = ['high', 'medium', 'low'].includes(QUALITY_RAW) ? QUALITY_RAW : 'high';
+const PIX_CAP = { high: 2, medium: 1.5, low: 1.25 };
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, PIX_CAP[QUALITY] ?? 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.shadowMap.type = QUALITY === 'low' ? THREE.BasicShadowMap : THREE.PCFShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.15;
 app.appendChild(renderer.domElement);
@@ -50,8 +58,8 @@ addWalk(-1.64, -2.18, -1.36, -1.32);                /* bathroom door */
 addWalk(1.36, -2.18, 1.64, -1.32);                  /* kitchen door */
 
 /* ---------- global light + dust ---------- */
-scene.add(new THREE.HemisphereLight(0xfff1dd, 0x4a4038, 0.5));
-const dusk = new THREE.DirectionalLight(0x8890c8, 0.7);
+scene.add(new THREE.HemisphereLight(0xfff1dd, 0x4a4038, 0.3));
+const dusk = new THREE.DirectionalLight(0x7a86cc, 0.9);
 put(dusk, 1.5, 4.5, -14);
 dusk.target.position.set(0.4, 0.8, 0);
 dusk.castShadow = true;
@@ -59,6 +67,20 @@ dusk.shadow.mapSize.set(2048, 2048);
 dusk.shadow.camera.left = -10; dusk.shadow.camera.right = 10;
 dusk.shadow.camera.top = 10; dusk.shadow.camera.bottom = -10;
 scene.add(dusk, dusk.target);
+/* dim cool fill through the south living-room window (no shadow: cheap) */
+const southFill = new THREE.DirectionalLight(0x6a78c0, 0.32);
+put(southFill, -2, 4.2, 14);
+southFill.target.position.set(0.5, 0.7, 6);
+scene.add(southFill, southFill.target);
+
+/* image-based lighting: dusk HDRI -> PMREM env (lighting only, no visible sky) */
+new RGBELoader().load('./assets/env/qwantani_dusk_2_1k.hdr', (tex) => {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  scene.environment = pmrem.fromEquirectangular(tex).texture;
+  scene.environmentIntensity = 0.24;   /* stay subtle: practicals dominate */
+  tex.dispose(); pmrem.dispose();
+});
 
 const dustGeo = new THREE.BufferGeometry();
 const dustN = 260, dustPos = new Float32Array(dustN * 3);
@@ -134,8 +156,7 @@ const keys = {};
 let yaw = Math.PI, pitch = 0.32, firstPerson = false;
 let vy = 0, grounded = true, phase = 0, bobBlend = 0;
 
-const isTouchDevice = navigator.maxTouchPoints > 0 || 'ontouchstart' in window
-  || new URLSearchParams(location.search).has('touch');
+const isTouchDevice = isTouch;
 
 const enterEl = document.getElementById('enter');
 const hudEl = document.getElementById('hud');
@@ -220,10 +241,16 @@ addEventListener('keydown', (e) => {
   if (e.code === 'Space' && grounded) { vy = 4.6; grounded = false; }
 });
 addEventListener('keyup', (e) => keys[e.code] = false);
+/* ---------- post pipeline (GTAO + bloom + grade + SMAA) ---------- */
+const pipe = createPipeline(renderer, scene, camera);
+pipe.setQuality(QUALITY);
+if (params.get('fx') === '0') pipe.setPostEnabled(false);
+pipe.setSize(innerWidth, innerHeight, Math.min(devicePixelRatio, PIX_CAP[QUALITY] ?? 2));
+
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+  pipe.setSize(innerWidth, innerHeight, Math.min(devicePixelRatio, PIX_CAP[QUALITY] ?? 2));
 });
 
 /* ---------- collision: walkable union + furniture AABBs ---------- */
@@ -265,6 +292,8 @@ const timer = new THREE.Timer();
 const headPos = new THREE.Vector3();
 const camPos = new THREE.Vector3();
 const desired = new THREE.Vector3();
+const camSmooth = new THREE.Vector3();
+let camInit = false;
 
 function animate() {
   timer.update();
@@ -345,11 +374,23 @@ function animate() {
     camPos.copy(desired);
     for (let i = 0; i < 20 && !inWalkable(camPos.x, camPos.z, -0.1); i++)
       camPos.lerp(headPos, 0.12);
+    /* gentle sway while walking (separate from body bob) */
+    camPos.y += Math.sin(phase * 2) * 0.014 * bobBlend;
     camPos.x = Math.max(-7.4, Math.min(7.4, camPos.x));
     camPos.z = Math.max(-8.9, Math.min(8.9, camPos.z));
     camPos.y = Math.max(0.28, Math.min(2.95, camPos.y));
-    camera.position.copy(camPos);
+    /* critically-damped-ish follow: smooths the wall pull-in too */
+    if (!camInit) { camSmooth.copy(camPos); camInit = true; }
+    camSmooth.lerp(camPos, 1 - Math.exp(-11 * dt));
+    camera.position.copy(camSmooth);
     camera.lookAt(headPos.x, headPos.y - 0.15, headPos.z);
+  }
+
+  /* slight speed FOV + settle */
+  const targetFov = 55 + (spd > 2.6 ? 5 : 0);
+  if (Math.abs(camera.fov - targetFov) > 0.02) {
+    camera.fov += (targetFov - camera.fov) * Math.min(1, dt * 5);
+    camera.updateProjectionMatrix();
   }
 
   /* --- ambient animation --- */
@@ -361,9 +402,9 @@ function animate() {
   }
   dust.geometry.attributes.position.needsUpdate = true;
 
-  renderer.render(scene, camera);
+  pipe.render();
 }
-window.__dbg = { char, camera, renderer, inWalkable, walkable, colliders,
+window.__dbg = { char, camera, renderer, inWalkable, walkable, colliders, pipe,
   setYaw: (v) => { yaw = v; }, setPitch: (v) => { pitch = v; },
   getYaw: () => yaw };
 renderer.setAnimationLoop(animate);

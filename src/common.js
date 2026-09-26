@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Reflector } from 'three/addons/objects/Reflector.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 /* ---------- tiny builders ---------- */
 export const M = (c, r = 0.85, met = 0, extra = {}) =>
@@ -51,6 +52,58 @@ export function imgTex(url) {
   return t;
 }
 
+/* ---------- PBR texture sets (Poly Haven CC0, 1k) ---------- */
+const pbrTex = (file, srgb, rx = 1, ry = 1) => {
+  const t = texLoader.load(`./assets/tex/${file}`);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(rx, ry);
+  t.anisotropy = 8;
+  return t;
+};
+export function pbrSet(name, rx, ry, opts = {}) {
+  const { normalScale = 0.6, ...rest } = opts;
+  return new THREE.MeshStandardMaterial({
+    map: pbrTex(`${name}_diff.jpg`, true, rx, ry),
+    normalMap: pbrTex(`${name}_nor_gl.jpg`, false, rx, ry),
+    roughnessMap: pbrTex(`${name}_rough.jpg`, false, rx, ry),
+    normalScale: new THREE.Vector2(normalScale, normalScale),
+    roughness: 1, ...rest
+  });
+}
+export const woodFloorMat = (rx, ry) => pbrSet('oak_wood_planks', rx, ry, { color: 0xd0a878, normalScale: 0.5 });
+/* painted drywall: uniform warm color + subtle plaster micro-surface;
+   no diffuse map — photo albedo reads as grime at this scale */
+export const plasterWallMat = (rx, ry) => new THREE.MeshStandardMaterial({
+  color: 0xeee4d3,
+  normalMap: pbrTex('white_plaster_02_nor_gl.jpg', false, rx, ry),
+  roughnessMap: pbrTex('white_plaster_02_rough.jpg', false, rx, ry),
+  normalScale: new THREE.Vector2(0.3, 0.3),
+  roughness: 0.95
+});
+export const bathTileMat = (rx, ry) => pbrSet('marble_01', rx, ry, { color: 0xf8f4ec, normalScale: 0.4 });
+export const marbleMat = (rx, ry) => pbrSet('marble_01', rx, ry, { color: 0xf0ece4, roughness: 0.8 });
+export const walnutMat = (rx, ry) => pbrSet('american_walnut_veneer', rx, ry, { color: 0xb08a68, normalScale: 0.4 });
+export const oakMat = (rx, ry) => pbrSet('oak_veneer_01', rx, ry, { color: 0xc49a70, normalScale: 0.4 });
+
+/* ---------- GLB assets (Poly Haven CC0) ---------- */
+const gltfLoader = new GLTFLoader();
+export function placeModel(parent, file, x, y, z, ry = 0, targetH = 1) {
+  gltfLoader.load(`./assets/models/${file}`, (g) => {
+    const m = g.scene;
+    m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    const size = new THREE.Box3().setFromObject(m).getSize(new THREE.Vector3());
+    m.scale.setScalar(targetH / size.y);
+    const bb = new THREE.Box3().setFromObject(m);
+    const cx = (bb.min.x + bb.max.x) / 2, cz = (bb.min.z + bb.max.z) / 2;
+    const wrap = new THREE.Group();
+    m.position.set(-cx, -bb.min.y, -cz);
+    wrap.add(m);
+    put(wrap, x, y, z, 0, ry, 0);
+    parent.add(wrap);
+  });
+}
+
 /* ---------- collision + walkable ---------- */
 export const colliders = [];
 export const walkable = [];
@@ -66,8 +119,8 @@ export function addWalk(x1, z1, x2, z2) {
 /* ---------- shared materials ---------- */
 export const WALL   = M(0xeee4d3, 0.95);
 export const TRIM   = M(0xf7f2e6, 0.9);
-export const WOOD   = M(0xa5713f, 0.75);
-export const WOOD_D = M(0x7c5330, 0.8);
+export const WOOD   = oakMat(1, 1);
+export const WOOD_D = walnutMat(1, 1);
 export const WOOD_L = M(0xc49a6b, 0.8);
 export const CREAM  = M(0xe9e2d2, 0.95);
 export const WHITE  = M(0xf3efe6, 0.9);
@@ -75,6 +128,10 @@ export const GREEN  = M(0x46543c, 0.95);
 export const GREEN_L= M(0x6b7a52, 0.95);
 export const DARK   = M(0x2b2b30, 0.6);
 export const BRASS  = M(0xc79a5b, 0.45, 0.6);
+/* HDR emissive core: MeshBasic color scaled past 1 so only true light
+   sources pass the bloom threshold (lit surfaces stay below ~1.2). */
+export const GLOW = (c, k = 2.6) =>
+  new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(k) });
 export const TERRA  = M(0xa9613c, 0.9);
 export const LEAF   = M(0x4f7a45, 0.85);
 export const LEAF_D = M(0x3c6237, 0.85);
@@ -271,7 +328,7 @@ export function candle(h = 0.1, r = 0.03) {
   const g = new THREE.Group();
   g.add(put(cyl(r, r, h, M(0xf0e6d0, 0.9)), 0, h / 2, 0));
   const flame = new THREE.Mesh(new THREE.SphereGeometry(r * 0.45, 8, 6),
-    new THREE.MeshBasicMaterial({ color: 0xffb84d }));
+    GLOW(0xffb84d, 3));
   flame.scale.y = 1.7;
   put(flame, 0, h + r * 0.5, 0); g.add(flame);
   return g;
@@ -318,8 +375,7 @@ export function polaroid(tex, ry = 0) {
 export function globeLamp(r = 0.09) {
   const g = new THREE.Group();
   g.add(put(cyl(0.02, 0.03, 0.08, BRASS), 0, 0.04, 0));
-  const bulb = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 12),
-    new THREE.MeshStandardMaterial({ color: 0xfff2dd, emissive: 0xffd9a0, emissiveIntensity: 1.4, roughness: 0.9 }));
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 12), GLOW(0xffd9a0, 2.8));
   put(bulb, 0, 0.08 + r, 0); g.add(bulb);
   return g;
 }
@@ -363,7 +419,9 @@ export function runWall(g, a, b, opts = {}) {
     const cx = a[0] + ux * (s0 + s1) / 2;
     const cz = a[1] + uz * (s0 + s1) / 2;
     const cy = (y0 + y1) / 2;
-    const wall = Math.abs(ux) > 0.9 ? box(sl, sh, t, mat) : box(t, sh, sl, mat);
+    /* per-segment material keeps plaster texel density uniform */
+    const segMat = mat === WALL ? plasterWallMat(sl / 1.7, sh / 1.7) : mat;
+    const wall = Math.abs(ux) > 0.9 ? box(sl, sh, t, segMat) : box(t, sh, sl, segMat);
     put(wall, cx, cy, cz); g.add(wall);
   }
 }

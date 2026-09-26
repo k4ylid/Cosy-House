@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import {
   M, put, box, cyl, sph, torus,
   setOrigin, addCol, addWalk,
-  WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, BRASS, DARK,
-  tileTex,
+  WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, BRASS, DARK, GLOW,
+  bathTileMat, woodFloorMat,
   leafyPlant, towelRoll, bottle, jar, candle, photoFrame,
   runWall, makeWindow, mirror, imgTex
 } from './common.js';
@@ -16,7 +16,7 @@ export function buildBathroom() {
   setOrigin(0, 0);
   addWalk(-7.44, -3.94, -1.56, 0.94);
 
-  const floor = box(6.3, 0.1, 5.3, new THREE.MeshStandardMaterial({ map: tileTex, roughness: 0.75 }));
+  const floor = box(6.3, 0.1, 5.3, bathTileMat(2.4, 2.0));
   put(floor, -4.5, -0.05, -1.5); g.add(floor);
 
   /* walls */
@@ -56,7 +56,7 @@ export function buildBathroom() {
   const bMirror = mirror(0.33); bMirror.rotation.y = -Math.PI / 2;
   put(bMirror, -5, 1.62, -3.94); g.add(bMirror);
   const led = new THREE.Mesh(new THREE.TorusGeometry(0.37, 0.02, 8, 40),
-    new THREE.MeshBasicMaterial({ color: 0xffe6b8 }));
+    GLOW(0xffe6b8, 3));
   put(led, -5, 1.62, -3.95); g.add(led);
   const mirrorGlow = new THREE.PointLight(0xffe0b0, 2.6, 3, 2);
   put(mirrorGlow, -5, 1.62, -3.6); g.add(mirrorGlow);
@@ -125,6 +125,12 @@ export function buildBathroom() {
   put(art2, -2.4, 1.8, 0.92, 0, Math.PI / 2, 0); g.add(art2);
 
   /* lights */
+  /* lived-in: soap dispenser on the vanity + laundry basket in the corner */
+  g.add(put(cyl(0.025, 0.028, 0.13, M(0x8ab5c9, 0.45)), -4.62, 0.95, -3.9));
+  g.add(put(cyl(0.01, 0.013, 0.045, WHITE), -4.62, 1.02, -3.9));
+  g.add(put(cyl(0.2, 0.16, 0.34, M(0xc9b896, 0.95)), -2.1, 0.17, 0.55));
+  addCol(-2.35, 0.3, -1.85, 0.8);
+
   const warm = new THREE.PointLight(0xffd9a8, 8, 9, 2);
   warm.castShadow = true; warm.shadow.mapSize.set(1024, 1024);
   put(warm, -4.5, 2.55, -1.5); g.add(warm);

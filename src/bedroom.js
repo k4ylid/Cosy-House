@@ -4,8 +4,8 @@ import {
   M, put, box, cyl, sph, cap, torus,
   setOrigin, addCol, cityTex,
   WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, GREEN, GREEN_L,
-  DARK, BRASS,
-  floorTex, knitTex, rugTex, posterTex,
+  DARK, BRASS, GLOW,
+  knitTex, rugTex, posterTex, woodFloorMat, plasterWallMat,
   leafyPlant, trailingPothos, monstera, bookRow, imgTex,
   runWall, doorFrame
 } from './common.js';
@@ -17,15 +17,15 @@ export function buildBedroom() {
   setOrigin(0, -6.5);
 
   /* ---------- shell ---------- */
-  const floor = box(6, 0.1, 5, new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.8 }));
+  const floor = box(6, 0.1, 5, woodFloorMat(3, 2.5));
   put(floor, 0, -0.05, 0); room.add(floor);
 
   const winX1 = 0.7, winX2 = 2.3, winY1 = 1.3, winY2 = 2.5;
   runWall(room, [-3, -2.5], [3, -2.5], {
     cuts: [{ s: (winX1 + winX2) / 2 + 3, w: winX2 - winX1, sillH: winY1, topH: winY2 }]
   });
-  const wallLeft  = box(0.1, 3, 5.1, WALL); put(wallLeft, -3.05, 1.5, 0); room.add(wallLeft);
-  const wallRight = box(0.1, 3, 5.1, WALL); put(wallRight, 3.05, 1.5, 0); room.add(wallRight);
+  const wallLeft  = box(0.1, 3, 5.1, plasterWallMat(3, 1.8)); put(wallLeft, -3.05, 1.5, 0); room.add(wallLeft);
+  const wallRight = box(0.1, 3, 5.1, plasterWallMat(3, 1.8)); put(wallRight, 3.05, 1.5, 0); room.add(wallRight);
   /* south wall shared with hallway — door at x=0 */
   runWall(room, [-3, 2.5], [1.5, 2.5], { cuts: [{ s: 3, w: 0.9, sillH: 0, topH: 2.05 }] });
   doorFrame(room, 'x', 2.5, 0, 0.9, 2.05, true);
@@ -157,7 +157,7 @@ export function buildBedroom() {
   const shelfPothos = trailingPothos(0.85, 0.55);
   put(shelfPothos, -2.85, 1.97, 0.02); room.add(shelfPothos);
   const globeLampM = new THREE.Mesh(new THREE.SphereGeometry(0.09, 18, 12),
-    new THREE.MeshStandardMaterial({ color: 0xfff2dd, emissive: 0xffd9a0, emissiveIntensity: 1.4, roughness: 0.9 }));
+    GLOW(0xffd9a0, 2.8));
   put(globeLampM, -2.85, 2.51, 0.28); room.add(globeLampM);
   const globeLight = new THREE.PointLight(0xffca8a, 4, 3.5, 2);
   put(globeLight, -2.75, 2.5, 0.28); room.add(globeLight);
@@ -185,7 +185,7 @@ export function buildBedroom() {
   const cornerCandle = cyl(0.025, 0.025, 0.09, M(0xf0e6d0, 0.9));
   put(cornerCandle, -0.62, 1.86, -2.42); room.add(cornerCandle);
   room.add(put(new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6),
-    new THREE.MeshBasicMaterial({ color: 0xffca7a })), -0.62, 1.92, -2.42));
+    GLOW(0xffca7a, 3)), -0.62, 1.92, -2.42));
 
   /* ---------- wardrobe + mirror + polaroids ---------- */
   const ward = new THREE.Group(); room.add(ward);
@@ -264,7 +264,7 @@ export function buildBedroom() {
   fl.add(put(cyl(0.11, 0.13, 0.03, BRASS), 2.05, 0.02, 0.05));
   fl.add(put(cyl(0.015, 0.015, 1.42, BRASS), 2.05, 0.74, 0.05));
   fl.add(put(new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.17, 0.22, 20, 1, true),
-    new THREE.MeshStandardMaterial({ color: 0xf2e2c4, emissive: 0xffca8a, emissiveIntensity: 0.9, roughness: 0.9, side: THREE.DoubleSide })),
+    new THREE.MeshStandardMaterial({ color: 0xf2e2c4, emissive: 0xffca8a, emissiveIntensity: 2.4, roughness: 0.9, side: THREE.DoubleSide })),
     2.05, 1.5, 0.05));
   const flLight = new THREE.PointLight(0xffc27a, 9, 5.5, 2);
   flLight.castShadow = true; flLight.shadow.mapSize.set(1024, 1024);
@@ -285,6 +285,21 @@ export function buildBedroom() {
   const sillP1 = leafyPlant(0.75); put(sillP1, 0.95, winY1 - 0.03, -2.42); room.add(sillP1);
   const sillP2 = trailingPothos(0.7, 0.5); put(sillP2, 2.05, winY1 - 0.03, -2.42); room.add(sillP2);
   const sillP3 = leafyPlant(0.6); put(sillP3, 1.55, winY1 - 0.03, -2.42); room.add(sillP3);
+
+  /* ---------- lived-in details ---------- */
+  /* slippers by the bed */
+  const slipper = (x, z, ry) => {
+    const s = put(cap(0.05, 0.14, M(0xd9c9a8, 1)), x, 0.035, z, -Math.PI / 2, ry, 0);
+    s.scale.set(0.85, 1, 1.15); room.add(s);
+  };
+  slipper(0.5, -0.42, 0.35); slipper(1.05, -0.36, -0.12);
+  /* open book left on the bed */
+  const ob = new THREE.Group();
+  ob.add(put(box(0.16, 0.012, 0.11, M(0xf4efe4, 1)), -0.04, 0, 0, 0, 0, 0.12));
+  ob.add(put(box(0.16, 0.012, 0.11, M(0xf4efe4, 1)), 0.04, 0, 0, 0, 0, -0.12));
+  put(ob, 0.9, 0.68, -1.9, 0, 0.5, 0); room.add(ob);
+  /* mug on the nightstand */
+  room.add(put(cyl(0.035, 0.03, 0.075, M(0xa9613c, 0.8)), -0.5, 0.55, -2.08));
 
   return room;
 }

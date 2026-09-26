@@ -4,7 +4,8 @@ import { readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
 const list = JSON.parse(execSync('curl -s http://localhost:29229/json').toString());
-const page = list.find(t => t.type === 'page');
+const page = list.filter(t => t.type === 'page' && t.url.includes('localhost')).pop()
+          || list.filter(t => t.type === 'page').pop();
 if (!page) { console.error('no page'); process.exit(1); }
 const ws = new WebSocket(page.webSocketDebuggerUrl);
 let id = 0;
@@ -28,4 +29,4 @@ ws.onmessage = (ev) => {
   }
 };
 ws.onerror = (e) => { console.error('WS ERR'); process.exit(1); };
-setTimeout(() => { console.error('timeout'); process.exit(1); }, 20000);
+setTimeout(() => { console.error('timeout'); process.exit(1); }, +(process.env.CDP_TIMEOUT || 120000));

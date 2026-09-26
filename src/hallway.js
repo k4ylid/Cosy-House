@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import {
-  M, put, box, cyl, sph,
+  M, put, box, cyl, sph, torus,
   setOrigin, addCol, addWalk,
   WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, GREEN, BRASS, DARK,
-  floorTex, rugTex,
+  rugTex, woodFloorMat,
   leafyPlant, trailingPothos, bookRow, bookStack, candle, jar, towelRoll,
   photoFrame, runWall, doorFrame, fakeDoor, globeLamp, mirror, imgTex
 } from './common.js';
@@ -15,7 +15,7 @@ export function buildHallway() {
   setOrigin(0, 0);
   addWalk(-1.44, -3.94, 1.44, 3.94);
 
-  const floor = box(3.1, 0.1, 8.3, new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.8 }));
+  const floor = box(3.1, 0.1, 8.3, woodFloorMat(1.55, 4.15));
   put(floor, 0, -0.05, 0); g.add(floor);
 
   /* west wall (bath door) / east wall (kitchen door) */
@@ -82,6 +82,10 @@ export function buildHallway() {
   hat.add(put(cyl(0.16, 0.16, 0.02, M(0xc9b28a, 1)), 0, 0, 0));
   hat.add(put(sph(0.09, M(0xc9b28a, 1)), 0, 0.05, 0));
   put(hat, -1.4, 1.64, -2.6, 0.1, 0, 0.12); g.add(hat);
+
+  /* keys dish on the console */
+  g.add(put(cyl(0.045, 0.035, 0.02, M(0xb8c4c9, 0.6)), -1.27, 0.87, 0.42));
+  g.add(put(torus(0.022, 0.006, BRASS), -1.27, 0.885, 0.42, Math.PI / 2, 0, 0.3));
 
   /* globe wall lamps along hall */
   for (const [x, z] of [[-1.42, 3.4], [1.42, -0.2]]) {
