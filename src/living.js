@@ -3,7 +3,8 @@ import {
   M, put, box, cyl, sph,
   setOrigin, addCol, addWalk,
   WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, GREEN, GREEN_L, BRASS, DARK, TERRA, GLOW,
-  geoRugTex, posterTex, woodFloorMat,
+  posterTex, woodFloorMat,
+  corduroyMat, linenMat, fleeceMat, teddyMat,
   leafyPlant, trailingPothos, monstera, bookRow, bookStack, candle, jar, bottle,
   photoFrame, runWall, doorFrame, makeWindow, imgTex, placeModel
 } from './common.js';
@@ -36,26 +37,26 @@ export function buildLiving() {
   /* ---------- sofa along west wall ---------- */
   addCol(-3, 5.0, -1.95, 7.3);
   const sofa = new THREE.Group(); g.add(sofa);
-  const sofaMat = M(0x5a6650, 0.95);
+  const sofaMat = corduroyMat(1.6, 1.6, 0x9aab92);
   sofa.add(put(box(0.8, 0.28, 2.1, sofaMat), -2.55, 0.28, 6.15));
   sofa.add(put(box(0.22, 0.75, 2.1, sofaMat), -2.86, 0.75, 6.15));
   sofa.add(put(box(0.78, 0.5, 0.2, sofaMat), -2.58, 0.62, 5.15));
   sofa.add(put(box(0.78, 0.5, 0.2, sofaMat), -2.58, 0.62, 7.15));
   for (const dz of [-0.65, 0, 0.65]) {
-    sofa.add(put(box(0.66, 0.18, 0.62, M(0x68755d, 1)), -2.52, 0.5, 6.15 + dz));
-    const back = box(0.16, 0.5, 0.62, M(0x68755d, 1));
+    sofa.add(put(box(0.66, 0.18, 0.62, corduroyMat(0.7, 0.7, 0xaebca2)), -2.52, 0.5, 6.15 + dz));
+    const back = box(0.16, 0.5, 0.62, corduroyMat(0.7, 0.7, 0xaebca2));
     put(back, -2.78, 0.82, 6.15 + dz, 0, 0, -0.12); sofa.add(back);
   }
   const pillow = (z, col, ry) => {
-    const p = sph(0.16, M(col, 1)); p.scale.set(0.45, 1, 1);
+    const p = sph(0.16, linenMat(0.5, 0.5, col)); p.scale.set(0.45, 1, 1);
     p.position.set(-2.42, 0.68, z); p.rotation.set(0, 0, ry);
     sofa.add(p);
   };
   pillow(5.5, 0xc9a26a, 0.15); pillow(6.8, 0xe4dcc8, -0.1); pillow(6.5, 0x8a4b3a, 0.2);
-  sofa.add(put(box(0.55, 0.05, 0.9, new THREE.MeshStandardMaterial({ color: 0xc9b8a0, roughness: 1 })), -2.5, 0.62, 6.7, 0, 0, 0.06));
+  sofa.add(put(box(0.55, 0.05, 0.9, fleeceMat(0.8, 0.9)), -2.5, 0.62, 6.7, 0, 0, 0.06));
 
   /* ---------- coffee table + rug ---------- */
-  const rug = box(2.4, 0.02, 1.9, new THREE.MeshStandardMaterial({ map: geoRugTex, roughness: 1 }));
+  const rug = box(2.4, 0.02, 1.9, teddyMat(2.2, 1.8));
   put(rug, -0.9, 0.012, 6.15); rug.receiveShadow = true; g.add(rug);
   addCol(-1.45, 5.45, -0.35, 6.85);
   g.add(put(box(1.05, 0.05, 0.55, WOOD_D), -0.9, 0.38, 6.15));
@@ -115,6 +116,7 @@ export function buildLiving() {
   const dChair = (x, z, ry) => {
     const c = new THREE.Group();
     c.add(put(box(0.4, 0.05, 0.38, WOOD), 0, 0.44, 0));
+    c.add(put(box(0.36, 0.03, 0.34, corduroyMat(0.5, 0.5, 0xb0a890)), 0, 0.475, 0));
     c.add(put(box(0.38, 0.55, 0.05, WOOD), 0, 0.92, -0.19, -0.12, 0, 0));
     for (const [dx, dz] of [[-0.16, -0.14], [0.16, -0.14], [-0.16, 0.14], [0.16, 0.14]])
       c.add(put(cyl(0.015, 0.013, 0.42, WOOD_D), dx, 0.21, dz));
@@ -163,7 +165,7 @@ export function buildLiving() {
 
   /* lived-in: remote on the sofa arm + throw blanket over the back */
   g.add(put(box(0.05, 0.022, 0.14, DARK), -2.58, 0.9, 5.18, 0, 0.2, 0));
-  g.add(put(box(0.3, 0.05, 0.52, M(0xa9613c, 1)), -2.84, 1.12, 6.9, 0, 0, 0.14));
+  g.add(put(box(0.3, 0.05, 0.52, fleeceMat(0.5, 0.7, 0xd0a078)), -2.84, 1.12, 6.9, 0, 0, 0.14));
 
   /* ambient */
   const warm = new THREE.PointLight(0xffd9a8, 6, 10, 2);

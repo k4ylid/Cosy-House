@@ -5,7 +5,8 @@ import {
   setOrigin, addCol, cityTex,
   WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, GREEN, GREEN_L,
   DARK, BRASS, GLOW,
-  knitTex, rugTex, posterTex, woodFloorMat, plasterWallMat,
+  posterTex, woodFloorMat, plasterWallMat,
+  linenMat, fleeceMat, teddyMat, corduroyMat,
   leafyPlant, trailingPothos, monstera, bookRow, imgTex,
   runWall, doorFrame
 } from './common.js';
@@ -63,10 +64,10 @@ export function buildBedroom() {
   addCol(-0.25, -2.4, 1.95, -0.7);
   bed.add(put(box(0.08, 1.0, 1.6, WOOD), -0.12, 0.55, -1.55));
   bed.add(put(box(2.0, 0.34, 1.6, WOOD), 0.85, 0.19, -1.55));
-  bed.add(put(box(1.92, 0.24, 1.5, CREAM), 0.87, 0.5, -1.55));
-  const duvet = box(1.45, 0.12, 1.56, new THREE.MeshStandardMaterial({ color: 0x46543c, roughness: 1 }));
+  bed.add(put(box(1.92, 0.24, 1.5, linenMat(2, 1.6)), 0.87, 0.5, -1.55));
+  const duvet = box(1.45, 0.12, 1.56, linenMat(1.5, 1.6, 0x7d8a68));
   put(duvet, 1.0, 0.63, -1.55); bed.add(duvet);
-  const throwKnit = box(0.62, 0.07, 1.62, new THREE.MeshStandardMaterial({ map: knitTex, roughness: 1 }));
+  const throwKnit = box(0.62, 0.07, 1.62, fleeceMat(0.8, 1.8));
   put(throwKnit, 1.5, 0.68, -1.55); bed.add(throwKnit);
   bed.add(put(box(0.66, 0.05, 1.58, M(0xf0e9dc, 1)), 0.06, 0.62, -1.55));
   const pil = (x, z, mat, ry = 0) => {
@@ -74,8 +75,8 @@ export function buildBedroom() {
     p.position.set(x, 0.72, z); p.rotation.set(-0.35, ry, 0);
     bed.add(p);
   };
-  pil(0.12, -1.98, GREEN); pil(0.12, -1.15, GREEN);
-  pil(0.3, -1.9, CREAM, 0.2); pil(0.3, -1.28, M(0xcfc5ae, 1), -0.15);
+  pil(0.12, -1.98, linenMat(0.6, 0.6, 0x5a6a4c)); pil(0.12, -1.15, linenMat(0.6, 0.6, 0x5a6a4c));
+  pil(0.3, -1.9, linenMat(0.6, 0.6, 0xefe6d4), 0.2); pil(0.3, -1.28, linenMat(0.6, 0.6, 0xd8ccb4), -0.15);
   const plush = new THREE.Group();
   plush.add(put(sph(0.085, M(0xf0e4d0, 1)), 0, 0.09, 0));
   plush.add(put(sph(0.065, M(0xf0e4d0, 1)), 0, 0.2, 0));
@@ -227,8 +228,7 @@ export function buildBedroom() {
   rugShape.lineTo(rw, rd - rr); rugShape.quadraticCurveTo(rw, rd, rw - rr, rd);
   rugShape.lineTo(-rw + rr, rd); rugShape.quadraticCurveTo(-rw, rd, -rw, rd - rr);
   rugShape.lineTo(-rw, -rd + rr); rugShape.quadraticCurveTo(-rw, -rd, -rw + rr, -rd);
-  const rug = new THREE.Mesh(new THREE.ShapeGeometry(rugShape, 24),
-    new THREE.MeshStandardMaterial({ map: rugTex, roughness: 1 }));
+  const rug = new THREE.Mesh(new THREE.ShapeGeometry(rugShape, 24), teddyMat(1.8, 1.4));
   put(rug, 0, 0.015, 1.25, -Math.PI / 2, 0, 0); rug.receiveShadow = true;
   room.add(rug);
 
@@ -249,7 +249,7 @@ export function buildBedroom() {
   const candleLight = new THREE.PointLight(0xff9e4d, 2.6, 2.6, 2);
   put(candleLight, 0.5, 0.66, 1.22); room.add(candleLight);
 
-  const cushion = sph(0.3, GREEN_L);
+  const cushion = sph(0.3, corduroyMat(0.5, 0.5, 0x9aa884));
   cushion.scale.set(1, 0.42, 1);
   put(cushion, -0.85, 0.13, 1.6, 0, 0.4, 0); room.add(cushion);
   addCol(-1.15, 1.3, -0.55, 1.9);

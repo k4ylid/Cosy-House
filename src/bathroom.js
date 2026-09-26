@@ -3,7 +3,7 @@ import {
   M, put, box, cyl, sph, torus,
   setOrigin, addCol, addWalk,
   WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, BRASS, DARK, GLOW,
-  bathTileMat, woodFloorMat,
+  bathTileMat, woodFloorMat, linenMat, teddyMat,
   leafyPlant, towelRoll, bottle, jar, candle, photoFrame,
   runWall, makeWindow, mirror, imgTex
 } from './common.js';
@@ -106,9 +106,9 @@ export function buildBathroom() {
     g.add(put(cyl(0.012, 0.012, 0.55, WOOD_D), -2.6, 0.45 + i * 0.38, 0.93, 0, 0, Math.PI / 2 - 0.18));
   for (const sx of [-2.84, -2.36])
     g.add(put(cyl(0.014, 0.014, 1.55, WOOD_D), sx, 0.78, 0.95, -0.16, 0, 0));
-  g.add(put(box(0.3, 0.5, 0.03, M(0xe9e2d2, 1)), -2.6, 1.15, 0.9, -0.16, 0, 0));
+  g.add(put(box(0.3, 0.5, 0.03, linenMat(0.4, 0.5)), -2.6, 1.15, 0.9, -0.16, 0, 0));
   /* bath mat */
-  g.add(put(box(0.8, 0.02, 0.5, M(0xe4dcc8, 1)), -5, 0.011, -2.9));
+  g.add(put(box(0.8, 0.02, 0.5, teddyMat(1, 0.8)), -5, 0.011, -2.9));
   /* plant */
   const bp = leafyPlant(1.0); put(bp, -2.1, 0, -3.5); g.add(bp);
   addCol(-2.4, -3.8, -1.8, -3.2);

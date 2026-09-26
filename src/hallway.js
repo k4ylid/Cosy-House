@@ -3,7 +3,7 @@ import {
   M, put, box, cyl, sph, torus,
   setOrigin, addCol, addWalk,
   WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, GREEN, BRASS, DARK,
-  rugTex, woodFloorMat,
+  woodFloorMat, teddyMat,
   leafyPlant, trailingPothos, bookRow, bookStack, candle, jar, towelRoll,
   photoFrame, runWall, doorFrame, fakeDoor, globeLamp, mirror, imgTex
 } from './common.js';
@@ -36,7 +36,7 @@ export function buildHallway() {
   }
 
   /* runner rug */
-  const runner = box(0.95, 0.02, 5.6, new THREE.MeshStandardMaterial({ map: rugTex, roughness: 1 }));
+  const runner = box(0.95, 0.02, 5.6, teddyMat(1, 5));
   put(runner, 0, 0.012, 0.3); runner.receiveShadow = true; g.add(runner);
 
   /* console cabinet against west wall + round mirror above */

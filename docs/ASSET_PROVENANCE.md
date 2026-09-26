@@ -15,6 +15,13 @@ Do not commit an external asset without adding an entry here.
 | Potted Plant 04 (model) | https://polyhaven.com/a/potted_plant_04 | Poly Haven | CC0 | 2026-09-25 | `public/assets/models/potted_plant_04/` (glTF + textures, 1k) | No | No | Living room floor plant (SE corner) |
 | Mid Century Lounge Chair (model) | https://polyhaven.com/a/mid_century_lounge_chair | Poly Haven | CC0 | 2026-09-25 | `public/assets/models/mid_century_lounge_chair/` (glTF + textures, 1k) | No | No | Living room reading chair (SE corner, collider added) |
 | Ceramic Vase 01 (model) | https://polyhaven.com/a/ceramic_vase_01 | Poly Haven | CC0 | 2026-09-25 | `public/assets/models/ceramic_vase_01/` (glTF + textures, 1k) | No | No | Living room coffee table vase |
+| Ribbed Corduroy (fabric) | https://polyhaven.com/a/ribbed_corduroy | Poly Haven | CC0 | 2026-09-26 | `ribbed_corduroy_{diff,nor_gl,rough}.jpg` (1k) | Tinted per-mesh | No | Sofa, chair seat pads, cushions |
+| Rough Linen (fabric) | https://polyhaven.com/a/rough_linen | Poly Haven | CC0 | 2026-09-26 | `rough_linen_{diff,nor_gl,rough}.jpg` (1k) | Tinted per-mesh | No | Mattress, duvet, pillows, towels |
+| Knitted Fleece (fabric) | https://polyhaven.com/a/knitted_fleece | Poly Haven | CC0 | 2026-09-26 | `knitted_fleece_{diff,nor_gl,rough}.jpg` (1k) | Tinted per-mesh | No | Throw blankets (bed, sofa, chair) |
+| Hessian 380 (fabric) | https://polyhaven.com/a/hessian_380 | Poly Haven | CC0 | 2026-09-26 | `hessian_380_{diff,nor_gl,rough}.jpg` (1k) | Tinted per-mesh | No | Window blind slats, kitchen runner |
+| Curly Teddy Natural (fabric) | https://polyhaven.com/a/curly_teddy_natural | Poly Haven | CC0 | 2026-09-26 | `curly_teddy_natural_{diff,nor_gl,rough}.jpg` (1k) | No | No | All rugs: bedroom, hallway runner, living, bath mat |
+| Beige Wall 002 (texture) | https://polyhaven.com/a/beige_wall_002 | Poly Haven | CC0 | 2026-09-26 | `beige_wall_002_{diff,nor_gl,rough}.jpg` (1k) | — | No | Downloaded but unused: too dark for interior walls |
+| Jogging Melange (fabric) | https://polyhaven.com/a/jogging_melange | Poly Haven | CC0 | 2026-09-26 | `jogging_melange_{diff,nor_gl,rough}.jpg` (1k) | — | No | Downloaded but unused: read too synthetic on curtains |
 
 All assets are Poly Haven CC0 — no attribution required; provenance is kept here anyway for auditability.
 No paid assets were purchased. No assets were sourced from Google Images, Pinterest, mirrors, or re-upload sites.

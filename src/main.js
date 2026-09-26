@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {
   M, put, box, cyl, sph, cap, torus,
-  colliders, walkable, addWalk
+  colliders, camBlockers, walkable, addWalk
 } from './common.js';
 import { buildBedroom } from './bedroom.js';
 import { buildHallway } from './hallway.js';
@@ -255,6 +255,15 @@ addEventListener('resize', () => {
 
 /* ---------- collision: walkable union + furniture AABBs ---------- */
 const CHAR_R = 0.26;
+function camFree(x, z) {
+  if (!inWalkable(x, z, -0.1)) return false;
+  for (const c of colliders)
+    if (x > c.x1 - 0.05 && x < c.x2 + 0.05 && z > c.z1 - 0.05 && z < c.z2 + 0.05) return false;
+  for (const c of camBlockers)
+    if (x > c.x1 && x < c.x2 && z > c.z1 && z < c.z2) return false;
+  return true;
+}
+
 function inWalkable(x, z, pad = 0) {
   for (const r of walkable)
     if (x > r.x1 - pad && x < r.x2 + pad && z > r.z1 - pad && z < r.z2 + pad) return true;
@@ -370,10 +379,10 @@ function animate() {
       headPos.y + Math.sin(pitch) * dist,
       headPos.z + Math.cos(yaw) * Math.cos(pitch) * dist
     );
-    /* pull camera toward head until it sits inside the house */
+    /* pull camera toward head until it's inside a room AND not in furniture */
     camPos.copy(desired);
-    for (let i = 0; i < 20 && !inWalkable(camPos.x, camPos.z, -0.1); i++)
-      camPos.lerp(headPos, 0.12);
+    for (let i = 0; i < 24 && !camFree(camPos.x, camPos.z); i++)
+      camPos.lerp(headPos, 0.1);
     /* gentle sway while walking (separate from body bob) */
     camPos.y += Math.sin(phase * 2) * 0.014 * bobBlend;
     camPos.x = Math.max(-7.4, Math.min(7.4, camPos.x));
@@ -382,6 +391,7 @@ function animate() {
     /* critically-damped-ish follow: smooths the wall pull-in too */
     if (!camInit) { camSmooth.copy(camPos); camInit = true; }
     camSmooth.lerp(camPos, 1 - Math.exp(-11 * dt));
+    if (!camFree(camSmooth.x, camSmooth.z)) camSmooth.copy(camPos); /* never clip through */
     camera.position.copy(camSmooth);
     camera.lookAt(headPos.x, headPos.y - 0.15, headPos.z);
   }

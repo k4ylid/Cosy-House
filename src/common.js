@@ -73,18 +73,28 @@ export function pbrSet(name, rx, ry, opts = {}) {
 }
 export const woodFloorMat = (rx, ry) => pbrSet('oak_wood_planks', rx, ry, { color: 0xd0a878, normalScale: 0.5 });
 /* painted drywall: uniform warm color + subtle plaster micro-surface;
-   no diffuse map — photo albedo reads as grime at this scale */
+   the plaster albedo photo reads dark/grimy multiplied by wall color */
 export const plasterWallMat = (rx, ry) => new THREE.MeshStandardMaterial({
   color: 0xeee4d3,
   normalMap: pbrTex('white_plaster_02_nor_gl.jpg', false, rx, ry),
   roughnessMap: pbrTex('white_plaster_02_rough.jpg', false, rx, ry),
-  normalScale: new THREE.Vector2(0.3, 0.3),
+  normalScale: new THREE.Vector2(0.35, 0.35),
   roughness: 0.95
 });
 export const bathTileMat = (rx, ry) => pbrSet('marble_01', rx, ry, { color: 0xf8f4ec, normalScale: 0.4 });
 export const marbleMat = (rx, ry) => pbrSet('marble_01', rx, ry, { color: 0xf0ece4, roughness: 0.8 });
 export const walnutMat = (rx, ry) => pbrSet('american_walnut_veneer', rx, ry, { color: 0xb08a68, normalScale: 0.4 });
 export const oakMat = (rx, ry) => pbrSet('oak_veneer_01', rx, ry, { color: 0xc49a70, normalScale: 0.4 });
+
+/* fabric sets — diffuse tints keep each surface's palette color */
+export const fabricMat = (name, rx, ry, opts = {}) =>
+  pbrSet(name, rx, ry, { roughness: 1, normalScale: 0.7, ...opts });
+export const corduroyMat = (rx, ry, color = 0xdfe6d8) => fabricMat('ribbed_corduroy', rx, ry, { color });
+export const linenMat    = (rx, ry, color = 0xf2ead8) => fabricMat('rough_linen', rx, ry, { color });
+export const fleeceMat   = (rx, ry, color = 0xe0c9a4) => fabricMat('knitted_fleece', rx, ry, { color });
+export const teddyMat    = (rx, ry) => fabricMat('curly_teddy_natural', rx, ry, { normalScale: 0.9 });
+export const hessianMat  = (rx, ry, color = 0xeadfc0) => fabricMat('hessian_380', rx, ry, { color });
+export const melangeMat  = (rx, ry, color = 0xd8d4cc) => fabricMat('jogging_melange', rx, ry, { color });
 
 /* ---------- GLB assets (Poly Haven CC0) ---------- */
 const gltfLoader = new GLTFLoader();
@@ -106,6 +116,7 @@ export function placeModel(parent, file, x, y, z, ry = 0, targetH = 1) {
 
 /* ---------- collision + walkable ---------- */
 export const colliders = [];
+export const camBlockers = []; /* camera-only obstacles (door leaves) — chars walk free */
 export const walkable = [];
 let OX = 0, OZ = 0;
 export function setOrigin(x, z) { OX = x; OZ = z; }
@@ -121,7 +132,7 @@ export const WALL   = M(0xeee4d3, 0.95);
 export const TRIM   = M(0xf7f2e6, 0.9);
 export const WOOD   = oakMat(1, 1);
 export const WOOD_D = walnutMat(1, 1);
-export const WOOD_L = M(0xc49a6b, 0.8);
+export const WOOD_L = oakMat(1, 1); // lighter tint handled per-mesh where needed
 export const CREAM  = M(0xe9e2d2, 0.95);
 export const WHITE  = M(0xf3efe6, 0.9);
 export const GREEN  = M(0x46543c, 0.95);
@@ -349,8 +360,8 @@ export function bottle(w = 0.05, h = 0.16, col = 0x5d3a2a) {
 }
 export function towelRoll(w = 0.34, col = 0x6b7a52) {
   const g = new THREE.Group();
-  g.add(put(box(w, 0.09, 0.24, M(col, 1)), 0, 0.045, 0));
-  g.add(put(box(w, 0.018, 0.24, M(col + 0x0a0a0a, 1)), 0, 0.1, 0));
+  g.add(put(box(w, 0.09, 0.24, linenMat(0.4, 0.3, col)), 0, 0.045, 0));
+  g.add(put(box(w, 0.018, 0.24, linenMat(0.4, 0.3, col + 0x0a0a0a)), 0, 0.1, 0));
   return g;
 }
 export function photoFrame(w = 0.17, h = 0.22, tex = null, col = 0xd8cfc0) {
@@ -453,13 +464,14 @@ export function makeWindow(g, axis, at, center, w, sillH, topH, side = -1) {
   put(sill, axis === 'x' ? center : at - side * 0.12, sillH - 0.06, axis === 'x' ? at - side * 0.12 : center);
   g.add(sill);
   /* bamboo blind rolled at top */
-  const blind = cyl(0.07, 0.07, fw, M(0xb08b58, 0.9));
+  const blind = cyl(0.07, 0.07, fw, hessianMat(fw, 0.6));
   const bx = axis === 'x' ? center : at - side * 0.1;
   const bz = axis === 'x' ? at - side * 0.1 : center;
   put(blind, bx, topH - 0.02, bz, axis === 'x' ? 0 : Math.PI / 2, 0, axis === 'x' ? Math.PI / 2 : 0);
   g.add(blind);
+  const slatMat = hessianMat(fw, 0.3, 0xf0e0ba);
   for (let i = 0; i < 4; i++) {
-    const slat = axis === 'x' ? box(fw, 0.045, 0.02, M(0xc2a06a, 0.9)) : box(0.02, 0.045, fw, M(0xc2a06a, 0.9));
+    const slat = axis === 'x' ? box(fw, 0.045, 0.02, slatMat) : box(0.02, 0.045, fw, slatMat);
     put(slat, bx, topH - 0.1 - i * 0.055, bz); g.add(slat);
   }
 }
@@ -475,8 +487,8 @@ export function doorFrame(g, axis, at, center, w = 0.9, h = 2.05, open = true) {
   F(0.09, h + 0.08, 0.2, center + w / 2 + 0.045, (h + 0.08) / 2, at);
   F(w + 0.18, 0.09, 0.2, center, h + 0.035, at);
   if (open) {
-    const leaf = box(axis === 'x' ? w : 0.04, h - 0.04, axis === 'x' ? 0.04 : w, M(0x8a6238, 0.8));
-    const ang = 1.95;
+    const leaf = box(axis === 'x' ? w : 0.04, h - 0.04, axis === 'x' ? 0.04 : w, walnutMat(0.9, h));
+    const ang = 2.42;
     if (axis === 'x') {
       leaf.position.set(center - w / 2 + Math.cos(ang) * w / 2, h / 2, at - Math.sin(ang) * w / 2);
       leaf.rotation.y = ang;
@@ -485,6 +497,9 @@ export function doorFrame(g, axis, at, center, w = 0.9, h = 2.05, open = true) {
       leaf.rotation.y = -ang + Math.PI;
     }
     g.add(leaf);
+    leaf.updateWorldMatrix(true, false);
+    const bb = new THREE.Box3().setFromObject(leaf);
+    camBlockers.push({ x1: bb.min.x - 0.04, z1: bb.min.z - 0.04, x2: bb.max.x + 0.04, z2: bb.max.z + 0.04 });
   }
 }
 

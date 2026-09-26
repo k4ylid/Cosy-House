@@ -3,7 +3,7 @@ import {
   M, put, box, cyl, sph, torus,
   setOrigin, addCol, addWalk,
   WALL, TRIM, WOOD, WOOD_D, WOOD_L, CREAM, WHITE, GREEN, BRASS, DARK, GLOW,
-  woodFloorMat, marbleMat,
+  woodFloorMat, marbleMat, corduroyMat, hessianMat,
   leafyPlant, trailingPothos, bookRow, jar, bottle, candle, towelRoll,
   photoFrame, runWall, makeWindow, imgTex
 } from './common.js';
@@ -122,6 +122,7 @@ export function buildKitchen() {
   const mkChair = (x, z, ry) => {
     const c = new THREE.Group();
     c.add(put(box(0.4, 0.05, 0.38, WOOD), 0, 0.45, 0));
+    c.add(put(box(0.36, 0.025, 0.34, corduroyMat(0.5, 0.5, 0xbcae96)), 0, 0.475, 0));
     c.add(put(box(0.4, 0.5, 0.05, WOOD), 0, 0.95, -0.19, -0.15, 0, 0));
     for (const [dx, dz] of [[-0.17, -0.15], [0.17, -0.15], [-0.17, 0.15], [0.17, 0.15]])
       c.add(put(cyl(0.015, 0.013, 0.44, WOOD_D), dx, 0.22, dz));
@@ -142,7 +143,7 @@ export function buildKitchen() {
   put(pendant, 4.3, 2.2, -0.8); g.add(pendant);
 
   /* rug + art + trash */
-  g.add(put(box(1.5, 0.02, 0.7, M(0x8a6b4a, 1)), 6.0, 0.011, -1.9));
+  g.add(put(box(1.5, 0.02, 0.7, hessianMat(1.5, 0.7, 0xb09468)), 6.0, 0.011, -1.9));
   const art = photoFrame(0.36, 0.46, imgTex('assets/kitchen-art.png'), 0xf4efe4);
   put(art, 3.4, 1.7, 0.92, 0, Math.PI / 2, 0); g.add(art);
   const art2 = photoFrame(0.18, 0.24, imgTex('assets/room-art.png'), 0xd8cfc0);
